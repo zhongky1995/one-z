@@ -23,6 +23,8 @@
     <button onclick="send()">Generate</button>
     <h3>Related Segments</h3>
     <pre id="related"></pre>
+    <h3>Error</h3>
+    <pre id="error"></pre>
     <h3>Result</h3>
     <pre id="result"></pre>
 <script>
@@ -35,10 +37,18 @@ async function send(){
         model: document.getElementById('model').value,
         embedding_model: document.getElementById('embedding_model').value
     };
-    const res = await fetch('/generate',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
-    const data = await res.json();
-    document.getElementById('related').textContent = data.related.join('\n');
-    document.getElementById('result').textContent = data.result;
+    try {
+        const res = await fetch('/generate',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+        if (!res.ok) {
+            throw new Error('Request failed with status ' + res.status);
+        }
+        const data = await res.json();
+        document.getElementById('related').textContent = data.related.join('\n');
+        document.getElementById('result').textContent = data.result;
+        document.getElementById('error').textContent = '';
+    } catch (err) {
+        document.getElementById('error').textContent = err.message || String(err);
+    }
 }
 </script>
 </body>

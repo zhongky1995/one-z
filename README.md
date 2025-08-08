@@ -19,3 +19,8 @@ Simple web editor demonstrating AI-assisted long text generation with segment me
 3. Open `http://localhost:8000` in a browser and configure provider settings.
 
 This is a minimal demo; integrate with real APIs by providing valid `base_url` and `api_key`.
+
+## Manual Test Plan
+1. Start the server: `uvicorn app:app --reload` and open `http://localhost:8000` in a browser.
+2. Enter a prompt and valid settings, then click **Generate**. A result should appear and the error area should be empty.
+3. Stop the server or disable the network and press **Generate** again. The new **Error** section displays the error message from the failed request.

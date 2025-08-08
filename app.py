@@ -23,10 +23,14 @@ class GenerateRequest(BaseModel):
 def generate(req: GenerateRequest) -> Dict[str, object]:
     cfg = req.dict()
     query_emb = get_embedding(req.prompt, cfg)
-    related = store.search(query_emb)
+    related = store.search(query_emb, kind="prompt")
     context = "\n".join(related + [req.prompt])
+
+    # Store the prompt before generating the result so it can be retrieved later
+    store.add(req.prompt, query_emb, kind="prompt")
+
     result = generate_text(context, cfg)
-    store.add(result, get_embedding(result, cfg))
+    store.add(result, get_embedding(result, cfg), kind="response")
     return {"result": result, "related": related}
 
 

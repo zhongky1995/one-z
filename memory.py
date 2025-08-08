@@ -1,23 +1,59 @@
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Any, Optional
 
 class MemoryStore:
     """Simple in-memory vector store for text segments."""
     def __init__(self) -> None:
-        self.segments: List[Dict[str, np.ndarray]] = []
+        self.segments: List[Dict[str, Any]] = []
 
-    def add(self, text: str, embedding: List[float]) -> None:
-        self.segments.append({"text": text, "embedding": np.array(embedding, dtype=float)})
+    def add(self, text: str, embedding: List[float], kind: Optional[str] = None) -> None:
+        """Add a text segment and its embedding to the store.
 
-    def search(self, embedding: List[float], top_k: int = 3) -> List[str]:
+        Args:
+            text: The text to store.
+            embedding: Vector embedding for the text.
+            kind: Optional metadata to distinguish entry type
+                (e.g., "prompt" or "response").
+        """
+
+        self.segments.append({
+            "text": text,
+            "embedding": np.array(embedding, dtype=float),
+            "kind": kind,
+        })
+
+    def search(
+        self,
+        embedding: List[float],
+        top_k: int = 3,
+        kind: Optional[str] = None,
+    ) -> List[str]:
+        """Search for similar text segments.
+
+        Args:
+            embedding: Query embedding.
+            top_k: Number of results to return.
+            kind: Optional metadata filter; if provided, only
+                segments with matching ``kind`` are considered.
+        """
+
         if not self.segments:
             return []
+
         query = np.array(embedding, dtype=float)
-        # cosine similarity
-        scores = [
-            float(np.dot(seg["embedding"], query) /
-                  (np.linalg.norm(seg["embedding"]) * np.linalg.norm(query)))
-            for seg in self.segments
-        ]
-        indices = np.argsort(scores)[::-1][:top_k]
-        return [self.segments[i]["text"] for i in indices]
+        scored = []
+        for seg in self.segments:
+            if kind is not None and seg.get("kind") != kind:
+                continue
+            score = float(
+                np.dot(seg["embedding"], query)
+                /
+                (np.linalg.norm(seg["embedding"]) * np.linalg.norm(query))
+            )
+            scored.append((score, seg["text"]))
+
+        if not scored:
+            return []
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return [text for _, text in scored[:top_k]]

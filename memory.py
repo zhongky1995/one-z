@@ -41,15 +41,19 @@ class MemoryStore:
             return []
 
         query = np.array(embedding, dtype=float)
+        query_norm = np.linalg.norm(query)
+        if query_norm == 0:
+            return []
+
         scored = []
         for seg in self.segments:
             if kind is not None and seg.get("kind") != kind:
                 continue
-            score = float(
-                np.dot(seg["embedding"], query)
-                /
-                (np.linalg.norm(seg["embedding"]) * np.linalg.norm(query))
-            )
+            seg_emb = seg["embedding"]
+            seg_norm = np.linalg.norm(seg_emb)
+            if seg_norm == 0:
+                continue
+            score = float(np.dot(seg_emb, query) / (seg_norm * query_norm))
             scored.append((score, seg["text"]))
 
         if not scored:

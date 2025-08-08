@@ -19,9 +19,3 @@ Simple web editor demonstrating AI-assisted long text generation with segment me
 3. Open `http://localhost:8000` in a browser and configure provider settings.
 
 This is a minimal demo; integrate with real APIs by providing valid `base_url` and `api_key`.
-
-## Testing
-Run unit tests with:
-```bash
-pytest
-```

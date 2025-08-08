@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>AI Long Text Editor</title>
+</head>
+<body>
+    <h1>AI Long Text Editor</h1>
+    <label>Provider:
+        <select id="provider">
+            <option value="openai">OpenAI</option>
+            <option value="azure">Azure OpenAI</option>
+            <option value="qwen">通义千问</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="kimi">Kimi</option>
+        </select>
+    </label><br/>
+    <label>Base URL: <input id="base_url" size="50" /></label><br/>
+    <label>API Key: <input id="api_key" size="50" /></label><br/>
+    <label>Model: <input id="model" value="gpt-3.5-turbo" /></label><br/>
+    <label>Embedding Model: <input id="embedding_model" value="text-embedding-3-small" /></label><br/>
+    <textarea id="prompt" rows="6" cols="80" placeholder="输入文本...\n"></textarea><br/>
+    <button onclick="send()">Generate</button>
+    <h3>Related Segments</h3>
+    <pre id="related"></pre>
+    <h3>Result</h3>
+    <pre id="result"></pre>
+<script>
+async function send(){
+    const body = {
+        prompt: document.getElementById('prompt').value,
+        provider: document.getElementById('provider').value,
+        base_url: document.getElementById('base_url').value,
+        api_key: document.getElementById('api_key').value,
+        model: document.getElementById('model').value,
+        embedding_model: document.getElementById('embedding_model').value
+    };
+    const res = await fetch('/generate',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    const data = await res.json();
+    document.getElementById('related').textContent = data.related.join('\n');
+    document.getElementById('result').textContent = data.result;
+}
+</script>
+</body>
+</html>

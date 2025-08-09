@@ -11,6 +11,7 @@ Simple web editor demonstrating AI-assisted long text generation with segment me
 1. Install dependencies:
    ```bash
    pip install -r requirements.txt
+   pip install -r requirements-dev.txt  # includes pytest for running tests
    ```
 2. Run the server:
    ```bash

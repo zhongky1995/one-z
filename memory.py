@@ -5,6 +5,7 @@ class MemoryStore:
     """Simple in-memory vector store for text segments."""
     def __init__(self) -> None:
         self.segments: List[Dict[str, Any]] = []
+        self._dim: Optional[int] = None
 
     def add(self, text: str, embedding: List[float], kind: Optional[str] = None) -> None:
         """Add a text segment and its embedding to the store.
@@ -16,11 +17,20 @@ class MemoryStore:
                 (e.g., "prompt" or "response").
         """
 
-        self.segments.append({
-            "text": text,
-            "embedding": np.array(embedding, dtype=float),
-            "kind": kind,
-        })
+        if self._dim is None:
+            self._dim = len(embedding)
+        elif len(embedding) != self._dim:
+            raise ValueError(
+                f"Embedding dimension mismatch: expected {self._dim}, got {len(embedding)}"
+            )
+
+        self.segments.append(
+            {
+                "text": text,
+                "embedding": np.array(embedding, dtype=float),
+                "kind": kind,
+            }
+        )
 
     def search(
         self,
@@ -39,6 +49,11 @@ class MemoryStore:
 
         if not self.segments:
             return []
+
+        if self._dim is not None and len(embedding) != self._dim:
+            raise ValueError(
+                f"Embedding dimension mismatch: expected {self._dim}, got {len(embedding)}"
+            )
 
         query = np.array(embedding, dtype=float)
         query_norm = np.linalg.norm(query)

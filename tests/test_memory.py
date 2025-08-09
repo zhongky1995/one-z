@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from memory import MemoryStore
 
 def test_memory_store_retrieval():
@@ -23,3 +24,17 @@ def test_search_handles_zero_vectors():
 
     # query with zero vector returns empty list
     assert store.search([0.0, 0.0], kind='prompt') == []
+
+
+def test_add_raises_on_dimension_mismatch():
+    store = MemoryStore()
+    store.add('base', [1.0, 0.0])
+    with pytest.raises(ValueError):
+        store.add('bad', [1.0, 0.0, 0.0])
+
+
+def test_search_raises_on_dimension_mismatch():
+    store = MemoryStore()
+    store.add('base', [1.0, 0.0])
+    with pytest.raises(ValueError):
+        store.search([1.0])
